@@ -6,16 +6,36 @@ namespace XandO
 {
     public partial class Form1 : Form
     {
-        private string[] BoxContents = new string[]{"", "", "",
+
+        private string[] GameState = new string[]{"", "", "",
                                                     "", "", "",
                                                     "", "", "" };
+		enum Turn
+		{
+            Null,
+            Draw,
+            Human,
+            Computer
+		}
+        Turn CurrentTurn = Turn.Null;
+        int[][] WinStates = { 
+            new int[]{ 0, 1, 2 }, 
+            new int[] { 3, 4, 5 }, 
+            new int[] { 6, 7, 8 }, 
+            new int[] { 0, 3, 6 }, 
+            new int[] { 1, 4, 7 }, 
+            new int[] { 2, 5, 8 }, 
+            new int[] { 0, 4, 8 }, 
+            new int[] { 2, 4, 6 } 
+        };
+        string Human = "";
+        string Computer = "";
 
-        bool YourTurn = false;
-
-        bool NewGame = true;
         public Form1 ( )
         {
             InitializeComponent ( );
+
+            
         }
 
         private void Label1_Click(object sender, EventArgs e)
@@ -28,7 +48,6 @@ namespace XandO
             Label lbl = (Label)sender;
             Players_Turn(lbl, Convert.ToInt16(lbl.TabIndex));
         }
-        
         private void Label3_Click(object sender, EventArgs e)
         {
             Label lbl = (Label)sender;
@@ -65,34 +84,48 @@ namespace XandO
             Label lbl = (Label)sender;
             Players_Turn(lbl, Convert.ToInt16(lbl.TabIndex));
         }
-        private void NewGameToolStripMenuItem_Click(object sender, EventArgs e)
-        {
 
-                ResetBoard();
-            DialogResult PlayFirstOrNot = MessageBox.Show("Would you like to play first?","New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (PlayFirstOrNot == DialogResult.Yes)
+		private void toolStripButton1_NewGame_Click( object sender, EventArgs e )
+		{
+            NewGame();
+
+        }
+		private void toolStripButton1_Exit_Click( object sender, EventArgs e )
+		{
+            Application.Exit();
+
+        }
+       
+        private void NewGame()
+		{
+            ResetBoard();
+            DialogResult XorO = MessageBox.Show("Do you want to go first?","New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (XorO == DialogResult.Yes)
             {
-                YourTurn = true;
-                NewGame = false;
+                Human = "X";
+                Computer = "O";
+                CurrentTurn = Turn.Human;
             }
 
-            else if(PlayFirstOrNot == DialogResult.No)
+            else if(XorO == DialogResult.No)
             {
-                NewGame = false;
+                Computer = "X";
+                Human = "O";
+                CurrentTurn = Turn.Computer;
+                ComputersTurn();
 
-                Computers_Turn();//computer plays
             }
         }
 
         private void ResetBoard()
         {
-            for (int i = 0; i < BoxContents.Length; i++)
+            for (int i = 0; i < GameState.Length; i++)
             {
-                BoxContents[i] = "";
+                GameState[i] = "";
             }
-            Label[] AllBoxes = new Label[] { label1, label2, label3, label4, label5, label6, label7, label8, label9 };
-            
-            foreach (Label box in AllBoxes)
+        Label[] AllBoxes = new Label[] { label1, label2, label3, label4, label5, label6, label7, label8, label9 };
+
+            foreach ( Label box in AllBoxes)
             {
                 box.Text = "";
             }
@@ -100,111 +133,179 @@ namespace XandO
 
         private void Players_Turn(Label label, int index) 
         {
-            if (YourTurn && IsGameOver() == false && string.IsNullOrEmpty(Winner()))//if its human turn to play
+            if ( CurrentTurn == Turn.Human )
             {
-                if (label.Text == string.Empty)//if box is vaccant
+                if ( label.Text == string.Empty )//if box is vaccant
                 {
-                    BoxContents[index] = "X";
-                    label.Text = "X";
-                    Computers_Turn();
+                    GameState[ index ] = Human;
+                    label.Text = Human;
+                    CurrentTurn = Turn.Computer;
+
+
+                    ComputersTurn();
                 }
-            }
-            else
-            {
-                ResultDialog();
             }
         }
 
-        private void Computers_Turn()//Ai for the computer
-        {
-            if (IsGameOver() == false && string.IsNullOrEmpty(Winner()))
-            {
-
-
-                //Start Ai logic***************************************************
-                Label[] AllBoxes = new Label[] { label1, label2, label3, label4, label5, label6, label7, label8, label9 };
-                List<Label> EmptyBoxes = new List<Label>();
-
-                foreach (Label box in AllBoxes)
+		private void ComputersTurn()
+		{
+            if(CurrentTurn == Turn.Computer )
+			{
+                int bestMove = -2;
+                if ( Computer == "O" )
                 {
-                    if (box.Text == string.Empty)
+                    int maxEval = int.MaxValue;
+                    for ( int i = 0; i < GameState.Length; i++ )
                     {
-                        EmptyBoxes.Add(box);
+                        if ( string.IsNullOrEmpty(GameState[ i ]) )
+                        {
+                            GameState[ i ] = Computer;
+                            int eval = Minimax(GameState, true);
+                            GameState[ i ] = "";
+                            if ( eval < maxEval )
+                            {
+                                maxEval = eval;
+                                bestMove = i;
+                            }
+                        }
                     }
                 }
-                BoxContents[Convert.ToInt16(EmptyBoxes[0].TabIndex)] = "O";
-                EmptyBoxes[0].Text = "O";
-                
-                //end Ai logic*****************************************************
-
-                YourTurn = true;
-
-                //check if pc won
-                if (!string.IsNullOrEmpty(Winner()))
+				else
+				{
+                    int maxEval = -int.MaxValue;
+                    for ( int i = 0; i < GameState.Length; i++ )
+                    {
+                        if ( string.IsNullOrEmpty(GameState[ i ]) )
+                        {
+                            GameState[ i ] = Computer;
+                            int eval = Minimax(GameState, false);
+                            GameState[ i ] = "";
+                            if ( eval > maxEval )
+                            {
+                                maxEval = eval;
+                                bestMove = i;
+                            }
+                        }
+                    }
+                }
+                try
                 {
-                    ResultDialog();
+                    Label[] AllBoxes = new Label[] { label1, label2, label3, label4, label5, label6, label7, label8, label9 };
+                    GameState[ bestMove ] = Computer;
+                    AllBoxes[ bestMove ].Text = Computer;
+                    CurrentTurn = Turn.Human;
+                }
+				catch
+				{
+
+				}
+                over(GameOver());
+
+            }
+		}
+
+		private int Minimax(string[] position, bool maximizing_player)
+		{
+            Turn WhoWon = GameOver();
+            if( WhoWon == Turn.Human || WhoWon == Turn.Computer || WhoWon == Turn.Draw )
+			{
+				if(WhoWon == Turn.Human )
+				{
+                    return Human == "O" ? -1 : 1;
+				}
+                else if ( WhoWon == Turn.Computer )
+                {
+                    return Computer == "X" ? 1 : -1;
+                }
+                else if( WhoWon == Turn.Draw )
+                {
+                    return 0;
                 }
             }
+
+			if ( maximizing_player )
+			{
+                int maxEval = -int.MaxValue;
+				for ( int i = 0; i < position.Length; i++ )
+				{
+                    if(string.IsNullOrEmpty(position[ i ]) )
+					{
+                        position[ i ] = "X";
+                        int eval = Minimax(position, false);
+                        maxEval = Math.Max(maxEval, eval);
+                        position[ i ] = "";
+					}
+				}
+                return maxEval;
+			}
             else
             {
-                ResultDialog();
+                int minEval = int.MaxValue;
+                for ( int i = 0; i < position.Length; i++ )
+                {
+                    if ( string.IsNullOrEmpty(position[ i ]) )
+                    {
+                        position[ i ] = "O";
+                        int eval = Minimax(position, true);
+                        minEval = Math.Min(minEval, eval);
+                        position[ i ] = "";
+                    }
+                }
+                return minEval;
             }
         }
 
-        private bool IsGameOver()
-        {
-            bool over = true;
-            foreach (string item in BoxContents)
+        private void over(Turn t )
+		{
+            CurrentTurn = Turn.Human;
+            if ( t != Turn.Null)
             {
-                if (string.IsNullOrEmpty(item))
+                string winner = t == Turn.Human ? "You" : "Computer";
+                string text = t == Turn.Draw ? $"It's a tie!\nDo you want to play again?" : $"{winner} Won!\nDo you want to play again?";
+                DialogResult PLayAgain = MessageBox.Show(text, "Game over!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if(PLayAgain == DialogResult.Yes )
+				{
+
+                    NewGame();
+				}
+				else
+				{
+                    CurrentTurn = Turn.Null;
+				}
+
+            }
+        }
+
+        private Turn GameOver()
+		{
+            //check if human won
+			for ( int i = 0; i < WinStates.Length; i++ )
+			{
+                if(GameState[WinStates[i][0]] == Human && GameState[ WinStates[ i][1] ] == Human && GameState[ WinStates[ i] [2 ] ] == Human )
+				{
+                    return Turn.Human;
+				}
+			}
+            //check if computer won
+            for ( int i = 0; i < WinStates.Length; i++ )
+            {
+                if ( GameState[ WinStates[ i ][ 0 ] ] == Computer && GameState[ WinStates[ i ][ 1 ] ] == Computer && GameState[ WinStates[ i ][ 2 ] ] == Computer )
                 {
-                    over = false;
-                    break;
+                    return Turn.Computer;
                 }
             }
+			//if game is not over and noone has won
+			foreach ( string state in GameState )
+			{
+                if(string.IsNullOrEmpty(state) )
+				{
+                    return Turn.Null;
+				}
+			}
 
-            return over;
+			//if game is over and noone has won
+            return Turn.Draw;
         }
 
-        private string Winner()
-        {
-            string won = "";
-
-            int[,] States = { { 0, 1, 2 }, { 3, 4, 5 }, {6, 7, 8 }, { 0, 3, 6 }, { 1, 4, 7 }, { 2, 5, 8 }, { 0, 4, 8 }, { 2, 4, 6 } };
-
-            for (int i = 0; i < 8; i++)
-            {
-
-                    string w = HasWon(States[i,0], States[i,1], States[i,2] );
-                if (!string.IsNullOrEmpty(w))
-                {
-                    won = w[0].ToString() + " Won!";
-                    break;
-                }
-            }
-
-            if (string.IsNullOrEmpty(won) && IsGameOver() == true)
-            {
-                won = "It's a tie.";
-            }
-            return won;
-        }
-        private string HasWon(int a,int b,int c)
-        {
-            string won = "";
-            if($"{BoxContents[a]}{BoxContents[b]}{BoxContents[c]}" == "OOO" || $"{BoxContents[a]}{BoxContents[b]}{BoxContents[c]}" == "XXX")
-            {
-                won = BoxContents[a];
-            }
-            return won;
-        }
-        private void ResultDialog()
-        {
-            if (NewGame == false)
-            {
-                DialogResult GameOver = MessageBox.Show($"{Winner()}.\nPlease start a new game.", "Game Over!", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-
-            }
-        }
     }
 }
