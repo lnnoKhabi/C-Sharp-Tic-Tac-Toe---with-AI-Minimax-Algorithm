@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace XandO
 {
@@ -30,12 +31,13 @@ namespace XandO
         };
         string Human = "";
         string Computer = "";
-
+        // bool firstMove = true;
+        Label[] AllBoxes;
         public Form1 ( )
         {
             InitializeComponent ( );
+            AllBoxes = new Label[] { label1, label2, label3, label4, label5, label6, label7, label8, label9 };
 
-            
         }
 
         private void Label1_Click(object sender, EventArgs e)
@@ -111,9 +113,13 @@ namespace XandO
             {
                 Computer = "X";
                 Human = "O";
-                CurrentTurn = Turn.Computer;
-                ComputersTurn();
 
+                //first move is random
+                Random r = new Random();
+                int n = r.Next(0, 9);
+                GameState[ n ] = Computer;
+                AllBoxes[n].Text = Computer;
+                CurrentTurn = Turn.Human;
             }
         }
 
@@ -123,11 +129,11 @@ namespace XandO
             {
                 GameState[i] = "";
             }
-        Label[] AllBoxes = new Label[] { label1, label2, label3, label4, label5, label6, label7, label8, label9 };
 
             foreach ( Label box in AllBoxes)
             {
                 box.Text = "";
+                box.ForeColor = Color.Black;
             }
         }
 
@@ -140,8 +146,6 @@ namespace XandO
                     GameState[ index ] = Human;
                     label.Text = Human;
                     CurrentTurn = Turn.Computer;
-
-
                     ComputersTurn();
                 }
             }
@@ -190,7 +194,7 @@ namespace XandO
                 }
                 try
                 {
-                    Label[] AllBoxes = new Label[] { label1, label2, label3, label4, label5, label6, label7, label8, label9 };
+                    
                     GameState[ bestMove ] = Computer;
                     AllBoxes[ bestMove ].Text = Computer;
                     CurrentTurn = Turn.Human;
@@ -237,7 +241,7 @@ namespace XandO
 					}
 				}
                 return maxEval;
-			}
+            }
             else
             {
                 int minEval = int.MaxValue;
@@ -258,8 +262,28 @@ namespace XandO
         private void over(Turn t )
 		{
             CurrentTurn = Turn.Human;
-            if ( t != Turn.Null)
+            if ( t != Turn.Null) //if theres a winner
             {
+                for ( int i = 0; i < WinStates.Length; i++ )
+                {
+                    //highlight the winning line
+                    //if Human
+                    if ( GameState[ WinStates[ i ][ 0 ] ] == Human && GameState[ WinStates[ i ][ 1 ] ] == Human && GameState[ WinStates[ i ][ 2 ] ] == Human )
+                    {
+                        AllBoxes[ WinStates[ i ][ 0 ] ].ForeColor = Color.Red;
+                        AllBoxes[ WinStates[ i ][ 1 ] ].ForeColor = Color.Red;
+                        AllBoxes[ WinStates[ i ][ 2 ] ].ForeColor = Color.Red;
+                    }
+                    //if Computer
+                    else if ( GameState[ WinStates[ i ][ 0 ] ] == Computer && GameState[ WinStates[ i ][ 1 ] ] == Computer && GameState[ WinStates[ i ][ 2 ] ] == Computer )
+                    {
+                        AllBoxes[ WinStates[ i ][ 0 ] ].ForeColor = Color.Red;
+                        AllBoxes[ WinStates[ i ][ 1 ] ].ForeColor = Color.Red;
+                        AllBoxes[ WinStates[ i ][ 2 ] ].ForeColor = Color.Red;
+                    }
+                    
+                }
+                
                 string winner = t == Turn.Human ? "You" : "Computer";
                 string text = t == Turn.Draw ? $"It's a tie!\nDo you want to play again?" : $"{winner} Won!\nDo you want to play again?";
                 DialogResult PLayAgain = MessageBox.Show(text, "Game over!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -278,18 +302,16 @@ namespace XandO
 
         private Turn GameOver()
 		{
-            //check if human won
-			for ( int i = 0; i < WinStates.Length; i++ )
-			{
-                if(GameState[WinStates[i][0]] == Human && GameState[ WinStates[ i][1] ] == Human && GameState[ WinStates[ i] [2 ] ] == Human )
-				{
-                    return Turn.Human;
-				}
-			}
-            //check if computer won
+
             for ( int i = 0; i < WinStates.Length; i++ )
             {
-                if ( GameState[ WinStates[ i ][ 0 ] ] == Computer && GameState[ WinStates[ i ][ 1 ] ] == Computer && GameState[ WinStates[ i ][ 2 ] ] == Computer )
+                //check if human won
+                if ( GameState[ WinStates[ i ][ 0 ] ] == Human && GameState[ WinStates[ i ][ 1 ] ] == Human && GameState[ WinStates[ i ][ 2 ] ] == Human )
+                {
+                    return Turn.Human;
+                }
+                //check if computer won
+                else if ( GameState[ WinStates[ i ][ 0 ] ] == Computer && GameState[ WinStates[ i ][ 1 ] ] == Computer && GameState[ WinStates[ i ][ 2 ] ] == Computer )
                 {
                     return Turn.Computer;
                 }
