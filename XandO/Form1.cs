@@ -2,6 +2,8 @@
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace XandO
 {
@@ -31,6 +33,8 @@ namespace XandO
         };
         string Human = "";
         string Computer = "";
+        //bool GameOver = false;
+
         // bool firstMove = true;
         Label[] AllBoxes;
         public Form1 ( )
@@ -98,19 +102,37 @@ namespace XandO
 
         }
        
-        private void NewGame()
+        private async void NewGame()
 		{
             ResetBoard();
-            DialogResult XorO = MessageBox.Show("Do you want to go first?","New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (XorO == DialogResult.Yes)
-            {
-                Human = "X";
-                Computer = "O";
-                CurrentTurn = Turn.Human;
-            }
 
-            else if(XorO == DialogResult.No)
+            DialogResult cpuvscpu = MessageBox.Show("watch CPU vs CPU?","New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if ( cpuvscpu == DialogResult.No )
             {
+                DialogResult XorO = MessageBox.Show("Do you want to go first?", "New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if ( XorO == DialogResult.Yes )
+                {
+                    Human = "X";
+                    Computer = "O";
+                    CurrentTurn = Turn.Human;
+                }
+
+                else if ( XorO == DialogResult.No )
+                {
+                    Computer = "X";
+                    Human = "O";
+
+                    //first move is random
+                    Random r = new Random();
+                    int n = r.Next(0, 9);
+                    GameState[ n ] = Computer;
+                    AllBoxes[ n ].Text = Computer;
+                    CurrentTurn = Turn.Human;
+                }
+            }
+			else
+			{
+                CurrentTurn = Turn.Computer;
                 Computer = "X";
                 Human = "O";
 
@@ -118,8 +140,16 @@ namespace XandO
                 Random r = new Random();
                 int n = r.Next(0, 9);
                 GameState[ n ] = Computer;
-                AllBoxes[n].Text = Computer;
-                CurrentTurn = Turn.Human;
+                AllBoxes[ n ].Text = Computer;
+				for ( int i = 0; i < 8; i++ )
+				{
+                    //Thread.Sleep(200);
+                    await Task.Delay(1500);
+                    CurrentTurn = Turn.Computer;
+                    Computer = Computer == "X" ? "O" : "X";
+                    Human = Computer == "X" ? "O" : "X";
+                    ComputersTurn();
+				}
             }
         }
 
