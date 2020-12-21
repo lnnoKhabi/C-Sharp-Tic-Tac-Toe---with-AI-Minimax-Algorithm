@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace XandO
@@ -121,14 +119,17 @@ namespace XandO
                 {
                     Computer = "X";
                     Human = "O";
+                    //CurrentTurn = Turn.Computer;
+                    //ComputersTurn();
 
-                    //first move is random
-                    Random r = new Random();
-                    int n = r.Next(0, 9);
-                    GameState[ n ] = Computer;
-                    AllBoxes[ n ].Text = Computer;
-                    CurrentTurn = Turn.Human;
-                }
+
+					//first move is random
+					Random r = new Random();
+					int n = r.Next(0, 9);
+					GameState[ n ] = Computer;
+					AllBoxes[ n ].Text = Computer;
+					CurrentTurn = Turn.Human;
+				}
             }
 			else
 			{
@@ -136,11 +137,14 @@ namespace XandO
                 Computer = "X";
                 Human = "O";
 
-                //first move is random
-                Random r = new Random();
-                int n = r.Next(0, 9);
-                GameState[ n ] = Computer;
-                AllBoxes[ n ].Text = Computer;
+				//first move is random
+				Random r = new Random();
+				int n = r.Next(0, 9);
+				GameState[ n ] = Computer;
+				AllBoxes[ n ].Text = Computer;
+
+				//ComputersTurn();
+
 				for ( int i = 0; i < 8; i++ )
 				{
                     //Thread.Sleep(200);
@@ -189,17 +193,25 @@ namespace XandO
                 if ( Computer == "O" )
                 {
                     int maxEval = int.MaxValue;
+                        int shorter_depth = int.MaxValue;
                     for ( int i = 0; i < GameState.Length; i++ )
                     {
+                        int depth = 0;
                         if ( string.IsNullOrEmpty(GameState[ i ]) )
                         {
-                            GameState[ i ] = Computer;
-                            int eval = Minimax(GameState, true);
-                            GameState[ i ] = "";
-                            if ( eval < maxEval )
+                            GameState[ i ] = Computer;//do next move
+                            int eval = Minimax(GameState, true, ref depth);
+                            GameState[ i ] = "";//undo the move
+                            if ( eval <= maxEval )
                             {
                                 maxEval = eval;
                                 bestMove = i;
+                                if (depth < shorter_depth )
+								{
+                                    shorter_depth = depth;
+                                maxEval = eval;
+                                bestMove = i;
+								}
                             }
                         }
                     }
@@ -207,38 +219,49 @@ namespace XandO
 				else
 				{
                     int maxEval = -int.MaxValue;
+                        int shorter_depth = int.MaxValue;
                     for ( int i = 0; i < GameState.Length; i++ )
                     {
+                        int depth = 0;
                         if ( string.IsNullOrEmpty(GameState[ i ]) )
                         {
                             GameState[ i ] = Computer;
-                            int eval = Minimax(GameState, false);
+                            int eval = Minimax(GameState, false, ref depth);
                             GameState[ i ] = "";
-                            if ( eval > maxEval )
+                            if ( eval >= maxEval )
                             {
                                 maxEval = eval;
                                 bestMove = i;
+                                if ( depth < shorter_depth )
+                                {
+
+                                    shorter_depth = depth;
+                                    maxEval = eval;
+                                    bestMove = i;
+                                }
                             }
                         }
                     }
                 }
                 try
                 {
-                    
-                    GameState[ bestMove ] = Computer;
-                    AllBoxes[ bestMove ].Text = Computer;
-                    CurrentTurn = Turn.Human;
+                    if ( bestMove >= 0 ) 
+                    {
+                        GameState[ bestMove ] = Computer;
+                        AllBoxes[ bestMove ].Text = Computer;
+                        CurrentTurn = Turn.Human;
+                    }
                 }
-				catch
+				catch(Exception e)
 				{
-
+					MessageBox.Show(e.Message,"Error",MessageBoxButtons.OK,MessageBoxIcon.Warning);
 				}
                 over(GameOver());
 
             }
 		}
 
-		private int Minimax(string[] position, bool maximizing_player)
+		private int Minimax(string[] position, bool maximizing_player, ref int depth)
 		{
             Turn WhoWon = GameOver();
             if( WhoWon == Turn.Human || WhoWon == Turn.Computer || WhoWon == Turn.Draw )
@@ -262,10 +285,12 @@ namespace XandO
                 int maxEval = -int.MaxValue;
 				for ( int i = 0; i < position.Length; i++ )
 				{
+                    //depth = 0;
                     if(string.IsNullOrEmpty(position[ i ]) )
-					{
+                    {
                         position[ i ] = "X";
-                        int eval = Minimax(position, false);
+                        depth += 1;
+                        int eval = Minimax(position, false, ref depth );
                         maxEval = Math.Max(maxEval, eval);
                         position[ i ] = "";
 					}
@@ -277,10 +302,12 @@ namespace XandO
                 int minEval = int.MaxValue;
                 for ( int i = 0; i < position.Length; i++ )
                 {
+                    //depth = 0;
                     if ( string.IsNullOrEmpty(position[ i ]) )
                     {
                         position[ i ] = "O";
-                        int eval = Minimax(position, true);
+                        depth += 1;
+                        int eval = Minimax(position, true, ref depth);
                         minEval = Math.Min(minEval, eval);
                         position[ i ] = "";
                     }
