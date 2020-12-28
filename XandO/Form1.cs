@@ -100,61 +100,33 @@ namespace XandO
 
         }
        
-        private async void NewGame()
+        private void NewGame()
 		{
             ResetBoard();
 
-            DialogResult cpuvscpu = MessageBox.Show("watch CPU vs CPU?","New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if ( cpuvscpu == DialogResult.No )
+            DialogResult XorO = MessageBox.Show("Do you want to go first?", "New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if ( XorO == DialogResult.Yes )
             {
-                DialogResult XorO = MessageBox.Show("Do you want to go first?", "New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if ( XorO == DialogResult.Yes )
-                {
-                    Human = "X";
-                    Computer = "O";
-                    CurrentTurn = Turn.Human;
-                }
-
-                else if ( XorO == DialogResult.No )
-                {
-                    Computer = "X";
-                    Human = "O";
-                    //CurrentTurn = Turn.Computer;
-                    //ComputersTurn();
-
-
-					//first move is random
-					Random r = new Random();
-					int n = r.Next(0, 9);
-					GameState[ n ] = Computer;
-					AllBoxes[ n ].Text = Computer;
-					CurrentTurn = Turn.Human;
-				}
+                Human = "X";
+                Computer = "O";
+                CurrentTurn = Turn.Human;
             }
-			else
-			{
-                CurrentTurn = Turn.Computer;
+
+            else if ( XorO == DialogResult.No )
+            {
                 Computer = "X";
                 Human = "O";
+                //CurrentTurn = Turn.Computer;
+                //ComputersTurn();
 
 				//first move is random
 				Random r = new Random();
 				int n = r.Next(0, 9);
 				GameState[ n ] = Computer;
 				AllBoxes[ n ].Text = Computer;
-
-				//ComputersTurn();
-
-				for ( int i = 0; i < 8; i++ )
-				{
-                    //Thread.Sleep(200);
-                    await Task.Delay(1500);
-                    CurrentTurn = Turn.Computer;
-                    Computer = Computer == "X" ? "O" : "X";
-                    Human = Computer == "X" ? "O" : "X";
-                    ComputersTurn();
-				}
-            }
+				CurrentTurn = Turn.Human;
+			}
+            
         }
 
         private void ResetBoard()
@@ -386,5 +358,34 @@ namespace XandO
             return Turn.Draw;
         }
 
-    }
+		private async void toolStripButton_CPUvCPU_Click( object sender, EventArgs e )
+		{
+            DialogResult cpuvscpu = MessageBox.Show("watch CPU vs CPU?", "New Game!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if ( cpuvscpu == DialogResult.Yes )
+            {
+                ResetBoard();
+                CurrentTurn = Turn.Computer;
+                Computer = "X";
+                Human = "O";
+
+                //first move is random
+                Random r = new Random();
+                int n = r.Next(0, 9);
+                GameState[ n ] = Computer;
+                AllBoxes[ n ].Text = Computer;
+
+                //ComputersTurn();
+
+                for ( int i = 0; i < 8; i++ )
+                {
+                    //Thread.Sleep(200);
+                    await Task.Delay(1500);
+                    CurrentTurn = Turn.Computer;
+                    Computer = Computer == "X" ? "O" : "X";
+                    Human = Computer == "X" ? "O" : "X";
+                    ComputersTurn();
+                }
+            }
+        }
+	}
 }

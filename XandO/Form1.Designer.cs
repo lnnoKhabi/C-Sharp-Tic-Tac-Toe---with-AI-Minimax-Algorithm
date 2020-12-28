@@ -45,6 +45,7 @@
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
 			this.toolStripButton1_NewGame = new System.Windows.Forms.ToolStripButton();
 			this.toolStripButton1_Exit = new System.Windows.Forms.ToolStripButton();
+			this.toolStripButton_CPUvCPU = new System.Windows.Forms.ToolStripButton();
 			this.panel1.SuspendLayout();
 			this.tableLayoutPanel1.SuspendLayout();
 			this.panel2.SuspendLayout();
@@ -280,7 +281,8 @@
 			this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1_NewGame,
-            this.toolStripButton1_Exit});
+            this.toolStripButton1_Exit,
+            this.toolStripButton_CPUvCPU});
 			this.toolStrip1.Location = new System.Drawing.Point(0, 0);
 			this.toolStrip1.Name = "toolStrip1";
 			this.toolStrip1.Size = new System.Drawing.Size(484, 27);
@@ -306,11 +308,23 @@
 			this.toolStripButton1_Exit.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1_Exit.Image")));
 			this.toolStripButton1_Exit.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripButton1_Exit.Name = "toolStripButton1_Exit";
-			this.toolStripButton1_Exit.Size = new System.Drawing.Size(30, 22);
+			this.toolStripButton1_Exit.Size = new System.Drawing.Size(30, 24);
 			this.toolStripButton1_Exit.Text = "Exit";
 			this.toolStripButton1_Exit.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.toolStripButton1_Exit.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
 			this.toolStripButton1_Exit.Click += new System.EventHandler(this.toolStripButton1_Exit_Click);
+			// 
+			// toolStripButton_CPUvCPU
+			// 
+			this.toolStripButton_CPUvCPU.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			this.toolStripButton_CPUvCPU.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+			this.toolStripButton_CPUvCPU.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.toolStripButton_CPUvCPU.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_CPUvCPU.Image")));
+			this.toolStripButton_CPUvCPU.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripButton_CPUvCPU.Name = "toolStripButton_CPUvCPU";
+			this.toolStripButton_CPUvCPU.Size = new System.Drawing.Size(72, 24);
+			this.toolStripButton_CPUvCPU.Text = "Cpu vs Cpu";
+			this.toolStripButton_CPUvCPU.Click += new System.EventHandler(this.toolStripButton_CPUvCPU_Click);
 			// 
 			// Form1
 			// 
@@ -354,6 +368,7 @@
 		private System.Windows.Forms.ToolStrip toolStrip1;
 		private System.Windows.Forms.ToolStripButton toolStripButton1_NewGame;
 		private System.Windows.Forms.ToolStripButton toolStripButton1_Exit;
+		private System.Windows.Forms.ToolStripButton toolStripButton_CPUvCPU;
 	}
 }
 
